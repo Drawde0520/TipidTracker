@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-class Expense {
+class Expense extends HiveObject {
   final String id;
   final double amount;
   final String category;

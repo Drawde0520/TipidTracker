@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-class Utang {
+class Utang extends HiveObject {
   final String id;
   final String personName;
   final double amount;

@@ -3,7 +3,7 @@ import '../models/utang.dart';
 import '../services/hive_service.dart';
 
 class AddUtangScreen extends StatefulWidget {
-  const AddUtangScreen({Key? key}) : super(key: key);
+  const AddUtangScreen({super.key});
 
   @override
   State<AddUtangScreen> createState() => _AddUtangScreenState();

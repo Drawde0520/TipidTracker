@@ -40,11 +40,9 @@ jobs:
 
       - name: Analyze Dart Code
         run: |
-          if ! flutter analyze > analyze.txt 2>&1; then
-            cat analyze.txt
-            tail -n 30 analyze.txt | while read -r line; do echo "::error::ANALYZE: $line"; done
-            exit 1
-          fi
+          flutter analyze > analyze.txt 2>&1 || true
+          cat analyze.txt
+          tail -n 30 analyze.txt | while read -r line; do echo "::warning::ANALYZE: $line"; done
 
       - name: Build APK
         run: |

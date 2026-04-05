@@ -5,7 +5,7 @@ import '../models/expense.dart';
 class ChartWidget extends StatelessWidget {
   final List<Expense> expenses;
 
-  const ChartWidget({Key? key, required this.expenses}) : super(key: key);
+  const ChartWidget({super.key, required this.expenses});
 
   @override
   Widget build(BuildContext context) {

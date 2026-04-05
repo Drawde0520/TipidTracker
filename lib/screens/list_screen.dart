@@ -6,7 +6,7 @@ import '../models/expense.dart';
 import '../models/utang.dart';
 
 class ListScreen extends StatelessWidget {
-  const ListScreen({Key? key}) : super(key: key);
+  const ListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class ListScreen extends StatelessWidget {
 }
 
 class _ExpenseList extends StatelessWidget {
-  const _ExpenseList({Key? key}) : super(key: key);
+  const _ExpenseList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,7 @@ class _ExpenseList extends StatelessWidget {
 }
 
 class _UtangList extends StatelessWidget {
-  const _UtangList({Key? key}) : super(key: key);
+  const _UtangList({super.key});
 
   @override
   Widget build(BuildContext context) {

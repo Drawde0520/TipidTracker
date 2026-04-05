@@ -33,7 +33,7 @@ void main() async {
 }
 
 class TipidTrackerApp extends StatelessWidget {
-  const TipidTrackerApp({Key? key}) : super(key: key);
+  const TipidTrackerApp({super.key});
 
   @override
   Widget build(BuildContext context) {

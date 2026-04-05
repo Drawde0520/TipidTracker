@@ -48,16 +48,18 @@ jobs:
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true")
                   c = c.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true")
-                  c = c.replace("dependencies {", "dependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")")
-                  with open(kts, "w") as f: f.write(c)
+                  with open(kts, "w") as f: 
+                      f.write(c)
+                      f.write("\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")\n}\n")
                   print("Patched kts desugaring")
           elif os.path.exists(gvy):
               with open(gvy, "r") as f: c = f.read()
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled true")
                   c = c.replace("compileOptions {", "compileOptions {\n        coreLibraryDesugaringEnabled true")
-                  c = c.replace("dependencies {", "dependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"")
-                  with open(gvy, "w") as f: f.write(c)
+                  with open(gvy, "w") as f: 
+                      f.write(c)
+                      f.write("\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n")
                   print("Patched gvy desugaring")
           '
       - name: Analyze Dart Code

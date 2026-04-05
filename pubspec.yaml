@@ -1,4 +1,4 @@
-name: TipidTracker
+name: tipid_tracker
 description: "A financial tracking app for daily expenses and debt management."
 publish_to: 'none'
 version: 1.0.0+1

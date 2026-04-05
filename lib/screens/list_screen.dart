@@ -62,7 +62,7 @@ class _ExpenseList extends StatelessWidget {
                 ),
                 title: Text(e.category, style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(DateFormat.yMMMd().add_jm().format(e.timestamp)),
-                trailing: Text('₱\${e.amount.toStringAsFixed(2)}', 
+                trailing: Text('₱${e.amount.toStringAsFixed(2)}', 
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             );
@@ -100,7 +100,7 @@ class _UtangList extends StatelessWidget {
                 ),
                 title: Text(u.personName, style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(DateFormat.yMMMd().add_jm().format(u.timestamp)),
-                trailing: Text('₱\${u.amount.toStringAsFixed(2)}', 
+                trailing: Text('₱${u.amount.toStringAsFixed(2)}', 
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             );

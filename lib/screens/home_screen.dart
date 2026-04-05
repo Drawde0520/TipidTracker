@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         onAdFailedToLoad: (ad, err) {
-          debugPrint('Failed to load a banner ad: \${err.message}');
+          debugPrint('Failed to load a banner ad: ${err.message}');
           ad.dispose();
         },
       ),
@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 12),
           Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
           const SizedBox(height: 4),
-          Text('₱\${amount.toStringAsFixed(2)}', style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.bold)),
+          Text('₱${amount.toStringAsFixed(2)}', style: TextStyle(color: color, fontSize: 24, fontWeight: FontWeight.bold)),
         ],
       ),
     );

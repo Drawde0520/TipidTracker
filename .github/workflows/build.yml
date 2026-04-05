@@ -39,7 +39,27 @@ jobs:
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle || true
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
           perl -pi -e 's/<\/application>/    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"\/>\n<\/application>/g' android/app/src/main/AndroidManifest.xml || true
-
+          python3 -c '
+          import os
+          kts = "android/app/build.gradle.kts"
+          gvy = "android/app/build.gradle"
+          if os.path.exists(kts):
+              with open(kts, "r") as f: c = f.read()
+              if "multiDexEnabled" not in c:
+                  c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true")
+                  c = c.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true")
+                  c = c.replace("dependencies {", "dependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")")
+                  with open(kts, "w") as f: f.write(c)
+                  print("Patched kts desugaring")
+          elif os.path.exists(gvy):
+              with open(gvy, "r") as f: c = f.read()
+              if "multiDexEnabled" not in c:
+                  c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled true")
+                  c = c.replace("compileOptions {", "compileOptions {\n        coreLibraryDesugaringEnabled true")
+                  c = c.replace("dependencies {", "dependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"")
+                  with open(gvy, "w") as f: f.write(c)
+                  print("Patched gvy desugaring")
+          '
       - name: Analyze Dart Code
         run: |
           flutter analyze > analyze.txt 2>&1 || true

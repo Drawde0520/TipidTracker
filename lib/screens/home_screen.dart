@@ -13,6 +13,7 @@ import 'grocery_screen.dart';
 import 'palengke_prices_screen.dart';
 import 'savings_screen.dart';
 import '../models/savings.dart';
+import '../services/challenge_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,6 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildSummaryCards(),
               const SizedBox(height: 10),
               _buildDailyBudgetStatus(),
+              const SizedBox(height: 10),
+              _buildChallengeCard(),
               const SizedBox(height: 10),
               _buildQuickActions(),
               const SizedBox(height: 20),
@@ -193,6 +196,36 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildChallengeCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [Colors.green[600]!, Colors.green[400]!]),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.green.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.emoji_events, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Daily Tipid Challenge', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            TipidChallengeService.getChallenge(),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 

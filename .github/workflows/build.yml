@@ -49,9 +49,9 @@ jobs:
           if os.path.exists(root_gvy):
               with open(root_gvy, "r") as f: c = f.read()
               # Update kotlin_version to 1.9.10
-              c = re.sub(r"ext\.kotlin_version\s*=\s*['\"].*?['\"]", "ext.kotlin_version = \"1.9.10\"", c)
+              c = re.sub(r"ext\.kotlin_version\s*=\s*['\"].*?['\"]", "ext.kotlin_version = '1.9.10'", c)
               # Also update classpath for gradle if too old
-              c = re.sub(r"com\.android\.tools\.build:gradle:.*", "com.android.tools.build:gradle:7.3.0", c)
+              c = re.sub(r"com\.android\.tools\.build:gradle:[^'\"]*", "com.android.tools.build:gradle:7.3.0", c)
               with open(root_gvy, "w") as f: f.write(c)
               print("Root build.gradle patched")
 
@@ -67,7 +67,7 @@ jobs:
           if os.path.exists(kts):
               with open(kts, "r") as f: c = f.read()
               # Force compileSdkVersion to 34
-              c = re.sub(r"compileSdkVersion\s+.*", "compileSdkVersion = 34", c)
+              c = re.sub(r"compileSdkVersion\s*=\s*\d+", "compileSdkVersion = 34", c)
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true")
                   c = c.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true")
@@ -78,7 +78,7 @@ jobs:
           elif os.path.exists(gvy):
               with open(gvy, "r") as f: c = f.read()
               # Force compileSdkVersion to 34
-              c = re.sub(r"compileSdkVersion\s+.*", "compileSdkVersion 34", c)
+              c = re.sub(r"compileSdkVersion\s+\d+", "compileSdkVersion 34", c)
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled true")
                   c = c.replace("compileOptions {", "compileOptions {\n        coreLibraryDesugaringEnabled true")

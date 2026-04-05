@@ -40,11 +40,34 @@ jobs:
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
           perl -pi -e 's/<\/application>/    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"\/>\n<\/application>/g' android/app/src/main/AndroidManifest.xml || true
           python3 -c '
-          import os
+          import os, re
           kts = "android/app/build.gradle.kts"
           gvy = "android/app/build.gradle"
+          root_gvy = "android/build.gradle"
+          
+          # Patch Root build.gradle (Kotlin version)
+          if os.path.exists(root_gvy):
+              with open(root_gvy, "r") as f: c = f.read()
+              # Update kotlin_version to 1.9.0
+              c = re.sub(r"ext\.kotlin_version\s*=\s*['\"].*?['\"]", "ext.kotlin_version = \"1.9.10\"", c)
+              # Also update classpath for gradle if too old
+              c = re.sub(r"com\.android\.tools\.build:gradle:.*", "com.android.tools.build:gradle:7.3.0", c)
+              with open(root_gvy, "w") as f: f.write(c)
+              print("Root build.gradle patched")
+
+          # Patch Gradle wrapper
+          wrapper = "android/gradle/wrapper/gradle-wrapper.properties"
+          if os.path.exists(wrapper):
+              with open(wrapper, "r") as f: c = f.read()
+              c = re.sub(r"distributionUrl=.*", "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.3-all.zip", c)
+              with open(wrapper, "w") as f: f.write(c)
+              print("Gradle wrapper patched")
+
+          # Patch App build.gradle (MinSDK, MultiDex, Desugaring)
           if os.path.exists(kts):
               with open(kts, "r") as f: c = f.read()
+              # Force compileSdkVersion to 34
+              c = re.sub(r"compileSdkVersion\s+.*", "compileSdkVersion = 34", c)
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true")
                   c = c.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true")
@@ -54,6 +77,8 @@ jobs:
                   print("Patched kts desugaring")
           elif os.path.exists(gvy):
               with open(gvy, "r") as f: c = f.read()
+              # Force compileSdkVersion to 34
+              c = re.sub(r"compileSdkVersion\s+.*", "compileSdkVersion 34", c)
               if "multiDexEnabled" not in c:
                   c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled true")
                   c = c.replace("compileOptions {", "compileOptions {\n        coreLibraryDesugaringEnabled true")

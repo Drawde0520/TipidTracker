@@ -39,7 +39,7 @@ jobs:
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle || true
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
           perl -pi -e 's/<\/application>/    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"\/>\n<\/application>/g' android/app/src/main/AndroidManifest.xml || true
-          python3 -c '
+          python3 << 'EOF'
           import os, re
           kts = "android/app/build.gradle.kts"
           gvy = "android/app/build.gradle"
@@ -48,7 +48,7 @@ jobs:
           # Patch Root build.gradle (Kotlin version)
           if os.path.exists(root_gvy):
               with open(root_gvy, "r") as f: c = f.read()
-              # Update kotlin_version to 1.9.0
+              # Update kotlin_version to 1.9.10
               c = re.sub(r"ext\.kotlin_version\s*=\s*['\"].*?['\"]", "ext.kotlin_version = \"1.9.10\"", c)
               # Also update classpath for gradle if too old
               c = re.sub(r"com\.android\.tools\.build:gradle:.*", "com.android.tools.build:gradle:7.3.0", c)
@@ -86,7 +86,8 @@ jobs:
                       f.write(c)
                       f.write("\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n")
                   print("Patched gvy desugaring")
-          '
+          EOF
+
       - name: Analyze Dart Code
         run: |
           flutter analyze > analyze.txt 2>&1 || true

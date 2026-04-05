@@ -50,9 +50,12 @@ jobs:
         run: |
           if ! flutter build apk --release > build.txt 2>&1; then
             cat build.txt
-            curl -T build.txt "https://bashupload.com/build.txt" > upload_url.txt
-            DOWNLOAD_URL=$(cat upload_url.txt)
-            echo "::error::BUILD FAILED. Download log here: $DOWNLOAD_URL"
+            echo "::error::=== TASK FAILURE ==="
+            grep -A 60 -i "Execution failed for task" build.txt | head -n 60 | while read -r line; do echo "::error::$line"; done
+            echo "::error::=== EXCEPTIONS ==="
+            grep -A 30 -i "Exception:" build.txt | head -n 30 | while read -r line; do echo "::error::$line"; done
+            echo "::error::=== WHAT WENT WRONG ==="
+            grep -A 30 "What went wrong:" build.txt | head -n 50 | while read -r line; do echo "::error::$line"; done
             exit 1
           fi
 

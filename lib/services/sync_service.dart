@@ -9,9 +9,15 @@ class SyncService {
   static StreamSubscription? _subscription;
 
   static void init() {
-    _subscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
-      if (results.contains(ConnectivityResult.mobile) ||
-          results.contains(ConnectivityResult.wifi)) {
+    _subscription = Connectivity().onConnectivityChanged.listen((dynamic results) {
+      bool isConnected = false;
+      if (results is List) {
+        isConnected = results.contains(ConnectivityResult.mobile) || results.contains(ConnectivityResult.wifi);
+      } else if (results is ConnectivityResult) {
+        isConnected = results == ConnectivityResult.mobile || results == ConnectivityResult.wifi;
+      }
+      
+      if (isConnected) {
         _syncData();
       }
     });

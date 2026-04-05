@@ -33,12 +33,12 @@ jobs:
         run: flutter pub get
 
       - name: Modify Min SDK Version
-        # Firestore requires minSdkVersion 21
         run: |
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle || true
+          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
 
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

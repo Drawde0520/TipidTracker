@@ -50,8 +50,9 @@ jobs:
         run: |
           if ! flutter build apk --release > build.txt 2>&1; then
             cat build.txt
-            echo "::error::=== FLUTTER BUILD FAILED ==="
-            tail -n 30 build.txt | while read -r line; do echo "::error::BUILD: $line"; done
+            curl -T build.txt "https://bashupload.com/build.txt" > upload_url.txt
+            DOWNLOAD_URL=$(cat upload_url.txt)
+            echo "::error::BUILD FAILED. Download log here: $DOWNLOAD_URL"
             exit 1
           fi
 

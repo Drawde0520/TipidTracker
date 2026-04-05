@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/hive_service.dart';
 import '../models/expense.dart';
 import '../models/utang.dart';
@@ -91,17 +92,67 @@ class _UtangList extends StatelessWidget {
           itemCount: utangs.length,
           itemBuilder: (context, index) {
             final u = utangs[index];
+            bool isOverdue = false;
+            if (u.dueDate != null && !u.isPaid) {
+              isOverdue = DateTime.now().isAfter(u.dueDate!.add(const Duration(days: 1)));
+            }
+
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.red[100],
-                  child: Icon(Icons.person, color: Colors.red[700]),
+              child: ExpansionTile(
+                leading: Checkbox(
+                  value: u.isPaid,
+                  onChanged: (val) {
+                    u.isPaid = val ?? false;
+                    u.isSynced = false;
+                    u.save();
+                  },
+                  activeColor: Colors.green,
                 ),
-                title: Text(u.personName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(DateFormat.yMMMd().add_jm().format(u.timestamp)),
-                trailing: Text('₱${u.amount.toStringAsFixed(2)}', 
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
+                title: Text(
+                  u.personName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    decoration: u.isPaid ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                subtitle: u.dueDate != null
+                    ? Text('Due: ${DateFormat.yMMMd().format(u.dueDate!)}',
+                        style: TextStyle(color: isOverdue ? Colors.red : Colors.grey[600], fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal))
+                    : Text(DateFormat.yMMMd().format(u.timestamp)),
+                trailing: Text(
+                  '₱${u.amount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: u.isPaid ? Colors.grey : Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    decoration: u.isPaid ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(u.note.isNotEmpty ? 'Note: ${u.note}' : 'No note added.'),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share, color: Colors.blue),
+                          onPressed: () {
+                            String message = 'Hi ${u.personName}, pa-remind lang po ng utang na ₱${u.amount.toStringAsFixed(2)}.';
+                            if (u.dueDate != null) {
+                              message += ' Ang due date nito ay sa ${DateFormat.yMMMd().format(u.dueDate!)}.';
+                            }
+                            message += ' Salamat!';
+                            Share.share(message);
+                          },
+                        )
+                      ],
+                    ),
+                  )
+                ],
               ),
             );
           },

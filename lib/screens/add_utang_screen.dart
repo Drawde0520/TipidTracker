@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/utang.dart';
 import '../services/hive_service.dart';
+import '../services/notification_service.dart';
 
 class AddUtangScreen extends StatefulWidget {
   const AddUtangScreen({super.key});
@@ -12,12 +13,18 @@ class AddUtangScreen extends StatefulWidget {
 class _AddUtangScreenState extends State<AddUtangScreen> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
+  DateTime? _selectedDueDate;
 
   void _saveUtang() {
-    final name = _nameController.text;
+    final name = _nameController.text.trim();
+    final note = _noteController.text.trim();
     final amountText = _amountController.text;
     
-    if (name.isEmpty || amountText.isEmpty) return;
+    if (name.isEmpty || amountText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pangalan at amount ay kailangan')));
+      return;
+    }
     
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
@@ -30,10 +37,30 @@ class _AddUtangScreenState extends State<AddUtangScreen> {
       personName: name,
       amount: amount,
       timestamp: DateTime.now(),
+      dueDate: _selectedDueDate,
+      note: note,
     );
 
     HiveService.addUtang(utang);
+    if (utang.dueDate != null) {
+      NotificationService.scheduleUtangReminder(utang);
+    }
+    
     Navigator.pop(context);
+  }
+
+  void _pickDueDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
+    );
+    if (date != null) {
+      setState(() {
+        _selectedDueDate = date;
+      });
+    }
   }
 
   @override
@@ -61,6 +88,27 @@ class _AddUtangScreenState extends State<AddUtangScreen> {
                 labelText: 'Amount (₱)',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.money),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _noteController,
+              decoration: const InputDecoration(
+                labelText: 'Note (Optional)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.note),
+              ),
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: _pickDueDate,
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: 'Due Date',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+                child: Text(_selectedDueDate == null ? 'Piliin kailan babayaran' : '${_selectedDueDate!.toLocal()}'.split(' ')[0]),
               ),
             ),
             const SizedBox(height: 32),

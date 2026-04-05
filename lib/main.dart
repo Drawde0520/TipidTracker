@@ -5,12 +5,16 @@ import 'screens/home_screen.dart';
 import 'services/hive_service.dart';
 import 'services/sync_service.dart';
 import 'services/notification_service.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Local Storage First (Offline Priority)
   await HiveService.init();
+  
+  // Initialize Timezone
+  tz.initializeTimeZones();
 
   // Try Initialize Firebase (Will fail if no google-services.json but app will still open)
   try {
@@ -24,7 +28,8 @@ void main() async {
 
   // Initialize Notifications
   await NotificationService.init();
-  NotificationService.showReminder();
+  NotificationService.showDailyGastosReminder();
+  NotificationService.showSavingsReminder();
 
   // Initialize Sync Service Listener
   SyncService.init();

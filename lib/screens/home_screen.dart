@@ -9,6 +9,10 @@ import '../widgets/chart_widget.dart';
 import 'add_expense_screen.dart';
 import 'add_utang_screen.dart';
 import 'list_screen.dart';
+import 'grocery_screen.dart';
+import 'palengke_prices_screen.dart';
+import 'savings_screen.dart';
+import '../models/savings.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -76,6 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildSummaryCards(),
+              const SizedBox(height: 10),
+              _buildDailyBudgetStatus(),
+              const SizedBox(height: 10),
+              _buildQuickActions(),
               const SizedBox(height: 20),
               const Text('Gastos Breakdown', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
@@ -112,52 +120,156 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'utang_btn',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddUtangScreen())),
-            label: const Text('Add Utang'),
-            icon: const Icon(Icons.money_off),
-            backgroundColor: Colors.red[400],
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'gastos_btn',
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
+        label: const Text('Add Gastos', style: TextStyle(color: Colors.white)),
+        icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+        backgroundColor: Colors.green[600],
+      ),
+    );
+  }
+
+  Widget _buildDailyBudgetStatus() {
+    return ValueListenableBuilder<Box<Expense>>(
+      valueListenable: HiveService.expenses.listenable(),
+      builder: (context, box, _) {
+        final now = DateTime.now();
+        // Calculate sweldo day (15th or 30th)
+        int targetDay = 15;
+        DateTime nextSweldo;
+        if (now.day < 15) {
+          nextSweldo = DateTime(now.year, now.month, 15);
+        } else if (now.day < 30) {
+          nextSweldo = DateTime(now.year, now.month, 30);
+        } else {
+          nextSweldo = DateTime(now.year, now.month + 1, 15);
+        }
+        
+        final daysLeft = nextSweldo.difference(now).inDays;
+        
+        // Sum expenses since last sweldo
+        DateTime lastSweldo;
+        if (now.day >= 15 && now.day < 30) {
+          lastSweldo = DateTime(now.year, now.month, 15);
+        } else if (now.day >= 30) {
+          lastSweldo = DateTime(now.year, now.month, 30);
+        } else {
+          lastSweldo = DateTime(now.year, now.month - 1, 30);
+        }
+
+        final recentExpenses = box.values.where((e) => e.timestamp.isAfter(lastSweldo)).toList();
+        final totalRecent = recentExpenses.fold(0.0, (sum, e) => sum + e.amount);
+        
+        // Very basic simple budget estimation status
+        String status = "Matipid ka! 💸";
+        Color statusColor = Colors.green;
+        if (totalRecent > 10000) {
+           status = "Medyo magtipid, malayo pa sweldo! 😰";
+           statusColor = Colors.orange;
+        }
+        if (totalRecent > 20000) {
+           status = "Ubos na budget! 🚨";
+           statusColor = Colors.red;
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12), border: Border.all(color: statusColor)),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: statusColor),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Kaya pa ba hanggang sweldo?', style: TextStyle(fontWeight: FontWeight.bold, color: statusColor)),
+                    Text('$daysLeft days left • $status', style: TextStyle(fontSize: 12, color: statusColor.withOpacity(0.8))),
+                  ],
+                ),
+              )
+            ],
           ),
-          const SizedBox(height: 10),
-          FloatingActionButton.extended(
-            heroTag: 'gastos_btn',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddExpenseScreen())),
-            label: const Text('Add Gastos'),
-            icon: const Icon(Icons.add_shopping_cart),
-            backgroundColor: Colors.green[600],
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildActionBtn('Alkansya', Icons.savings, Colors.blue, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavingsScreen()))),
+        _buildActionBtn('Grocery', Icons.local_grocery_store, Colors.orange, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GroceryScreen()))),
+        _buildActionBtn('Palengke', Icons.storefront, Colors.teal, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PalengkePricesScreen()))),
+        _buildActionBtn('Utang', Icons.money_off, Colors.red, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddUtangScreen()))),
+      ],
+    );
+  }
+
+  Widget _buildActionBtn(String label, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSummaryCards() {
-    return Row(
-      children: [
-        Expanded(
-          child: ValueListenableBuilder<Box<Expense>>(
-            valueListenable: HiveService.expenses.listenable(),
-            builder: (context, box, _) {
-              final total = box.values.fold(0.0, (sum, e) => sum + e.amount);
-              return _buildCard('Total Gastos', total, Colors.green[700]!, Icons.account_balance_wallet);
-            },
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 150,
+            child: ValueListenableBuilder<Box<Expense>>(
+              valueListenable: HiveService.expenses.listenable(),
+              builder: (context, box, _) {
+                final total = box.values.fold(0.0, (sum, e) => sum + e.amount);
+                return _buildCard('Total Gastos', total, Colors.green[700]!, Icons.account_balance_wallet);
+              },
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ValueListenableBuilder<Box<Utang>>(
-            valueListenable: HiveService.utangs.listenable(),
-            builder: (context, box, _) {
-              final total = box.values.fold(0.0, (sum, e) => sum + e.amount);
-              return _buildCard('Total Utang', total, Colors.red[600]!, Icons.warning_amber_rounded);
-            },
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 150,
+            child: ValueListenableBuilder<Box<SavingsGoal>>(
+              valueListenable: HiveService.savingsGoals.listenable(),
+              builder: (context, box, _) {
+                final total = box.values.fold(0.0, (sum, e) => sum + e.currentAmount);
+                return _buildCard('Ipon (Alkansya)', total, Colors.blue[600]!, Icons.savings);
+              },
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 150,
+            child: ValueListenableBuilder<Box<Utang>>(
+              valueListenable: HiveService.utangs.listenable(),
+              builder: (context, box, _) {
+                final total = box.values.where((e) => !e.isPaid).fold(0.0, (sum, e) => sum + e.amount);
+                return _buildCard('Unpaid Utang', total, Colors.red[600]!, Icons.warning_amber_rounded);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

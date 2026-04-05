@@ -31,11 +31,11 @@ class ChartWidget extends StatelessWidget {
     final List<PieChartSectionData> sections = categoryTotals.entries.map((e) {
       final data = PieChartSectionData(
         value: e.value,
-        title: '\$${e.value.toStringAsFixed(0)}',
+        title: '₱${e.value.toStringAsFixed(0)}\n${e.key}',
         color: colors[colorIndex % colors.length],
-        radius: 50,
+        radius: 60,
         titleStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

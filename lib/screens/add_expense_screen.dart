@@ -12,7 +12,7 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
   String _selectedCategory = 'Food';
-  final List<String> _categories = ['Food', 'Bills', 'Transport', 'Other'];
+  final List<String> _categories = ['Food', 'Bills', 'Transport', 'Grocery', 'Other'];
 
   void _saveExpense() {
     final amountText = _amountController.text;
@@ -55,7 +55,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              initialValue: _selectedCategory,
+              value: _selectedCategory,
               decoration: const InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(),

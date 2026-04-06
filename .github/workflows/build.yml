@@ -47,6 +47,20 @@ jobs:
           cat analyze.txt
           tail -n 30 analyze.txt | while read -r line; do echo "::warning::ANALYZE: $line"; done
 
+      - name: Verify Patched Files
+        run: |
+          echo "=== Root build file ==="
+          cat android/build.gradle 2>/dev/null || cat android/build.gradle.kts 2>/dev/null || echo "No root build file"
+          echo ""
+          echo "=== Settings file ==="
+          cat android/settings.gradle 2>/dev/null || cat android/settings.gradle.kts 2>/dev/null || echo "No settings file"
+          echo ""
+          echo "=== App build file ==="
+          cat android/app/build.gradle 2>/dev/null || cat android/app/build.gradle.kts 2>/dev/null || echo "No app build file"
+          echo ""
+          echo "=== Gradle wrapper ==="
+          cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || echo "No wrapper"
+
       - name: Build APK
         run: |
           if ! flutter build apk --release > build.txt 2>&1; then

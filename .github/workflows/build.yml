@@ -39,60 +39,7 @@ jobs:
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle || true
           sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
           perl -pi -e 's/<\/application>/    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"\/>\n<\/application>/g' android/app/src/main/AndroidManifest.xml || true
-          python3 << 'EOF'
-          import os, re
-          
-          def patch_file(path, regex, replacement):
-              if os.path.exists(path):
-                  with open(path, "r") as f: content = f.read()
-                  new_content = re.sub(regex, replacement, content)
-                  if new_content != content:
-                      with open(path, "w") as f: f.write(new_content)
-                      print(f"✅ Patched {path}")
-                  else:
-                      print(f"ℹ️ No change needed for {path} (Regex might not have matched)")
-
-          # 1. Patch Root build.gradle (.gradle or .kts)
-          root_gradle = "android/build.gradle"
-          root_kts = "android/build.gradle.kts"
-          for p in [root_gradle, root_kts]:
-              patch_file(p, r"ext\.kotlin_version\s*=\s*['\"].*?['\"]", "ext.kotlin_version = '1.9.22'")
-              patch_file(p, r"com\.android\.tools\.build:gradle:[^'\"]*", "com.android.tools.build:gradle:8.0.2")
-              # Also handle the plugins block syntax
-              patch_file(p, r'id\("org\.jetbrains\.kotlin\.android"\) version "[^"]*"', 'id("org.jetbrains.kotlin.android") version "1.9.22"')
-          
-          # 2. Patch Gradle Wrapper
-          wrapper = "android/gradle/wrapper/gradle-wrapper.properties"
-          patch_file(wrapper, r"distributionUrl=.*", "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-all.zip")
-
-          # 3. Patch App build.gradle
-          app_gradle = "android/app/build.gradle"
-          app_kts = "android/app/build.gradle.kts"
-          for p in [app_gradle, app_kts]:
-              # Enforce SDK versions
-              if p.endswith(".kts"):
-                  patch_file(p, r"compileSdkVersion\s*=\s*\d+", "compileSdkVersion = 34")
-                  patch_file(p, r"targetSdkVersion\s*=\s*\d+", "targetSdkVersion = 34")
-                  patch_file(p, r"minSdkVersion\s*=\s*\d+", "minSdkVersion = 21")
-              else:
-                  patch_file(p, r"compileSdkVersion\s+\d+", "compileSdkVersion 34")
-                  patch_file(p, r"targetSdkVersion\s+\d+", "targetSdkVersion 34")
-                  patch_file(p, r"minSdkVersion\s+\d+", "minSdkVersion 21")
-              
-              # Enable MultiDex and Desugaring
-              with open(p, "r") as f: c = f.read()
-              if "multiDexEnabled" not in c:
-                  if p.endswith(".kts"):
-                      c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true")
-                      c = c.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true")
-                      c += "\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")\n}\n"
-                  else:
-                      c = c.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled true")
-                      c = c.replace("compileOptions {", "compileOptions {\n        coreLibraryDesugaringEnabled true")
-                      c += "\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n"
-                  with open(p, "w") as f: f.write(c)
-                  print(f"🚀 Enabled MultiDex & Desugaring in {p}")
-          EOF
+          python3 patch_android.py
 
       - name: Analyze Dart Code
         run: |
